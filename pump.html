@@ -387,10 +387,13 @@ let currentView='list'; // 'list' | 'client'
 let selectedClient=null;
 
 function loadData(){
-  try{trades=JSON.parse(localStorage.getItem(LS_TRADE))||[];}catch(e){trades=[];}
-  try{maints=JSON.parse(localStorage.getItem(LS_MAINT))||[];}catch(e){maints=[];}
-  if(!trades.length) seedTrades();
-  if(!maints.length) seedMaints();
+  const rawTrade=localStorage.getItem(LS_TRADE);
+  const rawMaint=localStorage.getItem(LS_MAINT);
+  try{trades=rawTrade?JSON.parse(rawTrade):[];}catch(e){trades=[];}
+  try{maints=rawMaint?JSON.parse(rawMaint):[];}catch(e){maints=[];}
+  // 키가 아예 없을 때(진짜 첫 실행)만 예시 데이터 채움. 사용자가 다 지운 경우는 그대로 빈 상태 유지.
+  if(rawTrade===null){ seedTrades(); saveTrades(); }
+  if(rawMaint===null){ seedMaints(); saveMaints(); }
 }
 function saveTrades(){localStorage.setItem(LS_TRADE,JSON.stringify(trades));if(typeof window.fbSaveTrades==='function')window.fbSaveTrades(trades);}
 function saveMaints(){localStorage.setItem(LS_MAINT,JSON.stringify(maints));if(typeof window.fbSaveMaints==='function')window.fbSaveMaints(maints);}
