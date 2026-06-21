@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>펌프카 관리 시스템</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{--bg:#0f1117;--bg2:#181c27;--bg3:#1f2435;--bg4:#262c3e;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--accent:#f5a623;--accent2:#e8941a;--blue:#4a9eff;--green:#3ecf8e;--red:#f56565;--purple:#a78bfa;--text:#f0f2f7;--text2:#9aa3b8;--text3:#626a82;--radius:12px;--radius-sm:8px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:50}
+.logo{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:var(--accent);letter-spacing:1px;display:flex;align-items:center;gap:10px}
+.header-right{font-size:12px;color:var(--text3);display:flex;align-items:center;gap:12px}
+.fb-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;font-size:12px;font-weight:500;font-family:'Noto Sans KR',sans-serif;border-radius:6px;cursor:pointer;transition:all .15s;border:1px solid}
+.fb-login{background:rgba(74,158,255,0.12);border-color:rgba(74,158,255,0.3);color:var(--blue)}
+.fb-login:hover{background:rgba(74,158,255,0.22)}
+.fb-logout{background:transparent;border-color:var(--border2);color:var(--text2)}
+.fb-logout:hover{border-color:var(--text3);color:var(--text)}
+.fb-status{font-size:11px;color:var(--text3)}
+.fb-user{font-size:11px;color:var(--text2)}
+.nav-tabs{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;display:flex}
+.nav-tab{padding:14px 22px;font-size:14px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;display:flex;align-items:center;gap:8px}
+.nav-tab:hover{color:var(--text)}
+.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+main{max-width:1200px;margin:0 auto;padding:24px}
+.section{display:none}.section.active{display:block}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px}
+.stat-card .label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.stat-card .value{font-size:24px;font-weight:700;font-family:'Oswald',sans-serif}
+.stat-card .value.yellow{color:var(--accent)}.stat-card .value.green{color:var(--green)}.stat-card .value.red{color:var(--red)}.stat-card .value.blue{color:var(--blue)}
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.toolbar-left{display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'Noto Sans KR',sans-serif}
+.btn-primary{background:var(--accent);color:#000}.btn-primary:hover{background:var(--accent2)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}.btn-ghost:hover{background:var(--bg3);color:var(--text)}
+.filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-size:12px;font-family:'Noto Sans KR',sans-serif;transition:all .15s;white-space:nowrap}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#000;font-weight:700}
+.year-select{background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:5px 10px;border-radius:var(--radius-sm);font-family:'Noto Sans KR',sans-serif;font-size:13px;outline:none}
+.table-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:720px}
+thead tr{background:var(--bg3)}
+thead th{padding:12px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--bg3)}
+tbody td{padding:12px 14px;font-size:13px;vertical-align:middle}
+.empty-row td{text-align:center;padding:48px;color:var(--text3)}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-26{background:rgba(74,158,255,0.15);color:var(--blue);border:1px solid rgba(74,158,255,0.25)}
+.badge-32{background:rgba(62,207,142,0.15);color:var(--green);border:1px solid rgba(62,207,142,0.25)}
+.badge-full{background:rgba(167,139,250,0.15);color:var(--purple);border:1px solid rgba(167,139,250,0.25)}
+.badge-am{background:rgba(245,166,35,0.15);color:var(--accent);border:1px solid rgba(245,166,35,0.25)}
+.badge-pm{background:rgba(245,101,101,0.15);color:var(--red);border:1px solid rgba(245,101,101,0.25)}
+.pay-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:none;font-family:'Noto Sans KR',sans-serif;transition:all .15s}
+.pay-btn.unpaid{background:rgba(245,101,101,0.12);color:var(--red);border:1px solid rgba(245,101,101,0.25)}
+.pay-btn.unpaid:hover{background:rgba(245,101,101,0.25)}
+.pay-btn.paid{background:rgba(62,207,142,0.12);color:var(--green);border:1px solid rgba(62,207,142,0.25)}
+.pay-btn.paid:hover{background:rgba(62,207,142,0.25)}
+.icon-btn{background:transparent;border:none;cursor:pointer;color:var(--text3);padding:5px 7px;border-radius:6px;transition:all .15s;font-size:13px}
+.icon-btn:hover{color:var(--red);background:rgba(245,101,101,0.1)}
+/* ---- CLIENT VIEW ---- */
+.cv-banner{background:linear-gradient(135deg,rgba(245,166,35,0.12),rgba(245,101,101,0.08));border:1px solid rgba(245,166,35,0.25);border-radius:var(--radius);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:gap}
+.cv-back{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--text2);font-size:13px;transition:color .15s;background:none;border:none;font-family:'Noto Sans KR',sans-serif}
+.cv-back:hover{color:var(--accent)}
+.cv-name{font-size:20px;font-weight:700;color:var(--text)}
+.cv-sub{font-size:13px;color:var(--text3);margin-top:2px}
+.client-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:24px}
+.client-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;cursor:pointer;transition:all .2s;position:relative}
+.client-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.client-card.has-unpaid{border-left:3px solid var(--red)}
+.client-card.all-paid{border-left:3px solid var(--green)}
+.cc-name{font-size:16px;font-weight:700;margin-bottom:4px}
+.cc-meta{font-size:12px;color:var(--text3);margin-bottom:14px}
+.cc-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:13px}
+.cc-row .cc-label{color:var(--text3)}
+.cc-unpaid-badge{position:absolute;top:14px;right:14px;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+.cc-paid-badge{position:absolute;top:14px;right:14px;background:var(--green);color:#000;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);width:min(480px,100%);max-height:90vh;overflow-y:auto}
+.modal-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-header h3{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;color:var(--text)}
+.modal-body{padding:20px 24px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;color:var(--text3);margin-bottom:6px;font-weight:500}
+.field input,.field select,.field textarea{width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-size:14px;font-family:'Noto Sans KR',sans-serif;outline:none;transition:border .15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+.field textarea{resize:vertical;min-height:80px}
+.field select option{background:var(--bg3)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+/* MAINTENANCE */
+.maint-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.maint-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;transition:border-color .2s}
+.maint-card:hover{border-color:var(--border2)}
+.maint-card.overdue{border-left:3px solid var(--red)}
+.maint-card.soon{border-left:3px solid var(--accent)}
+.maint-card.ok{border-left:3px solid var(--green)}
+.maint-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.maint-title{font-size:15px;font-weight:700;color:var(--text)}
+.maint-pump{font-size:11px;color:var(--text3);margin-top:3px}
+.maint-status{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px}
+.status-overdue{background:rgba(245,101,101,0.15);color:var(--red)}
+.status-soon{background:rgba(245,166,35,0.15);color:var(--accent)}
+.status-ok{background:rgba(62,207,142,0.15);color:var(--green)}
+.maint-info{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.maint-info-item .mi-label{font-size:11px;color:var(--text3);margin-bottom:3px}
+.maint-info-item .mi-val{font-size:13px;font-weight:500;color:var(--text)}
+.maint-next{background:var(--bg3);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px}
+.next-date.overdue{color:var(--red)}.next-date.soon{color:var(--accent)}.next-date.ok{color:var(--green)}
+.maint-actions{display:flex;gap:6px;margin-top:14px}
+.maint-memo{font-size:12px;color:var(--text2);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);line-height:1.6}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+@media(max-width:600px){main{padding:16px}.nav-tab{padding:12px 14px;font-size:12px}.field-row{grid-template-columns:1fr}.stats-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><i class="fa-solid fa-truck-moving"></i>PUMP CAR MGR</div>
+  <div class="header-right">
+    <span class="fb-status" id="fb-sync-status">☁️ 로그인하면 동기화</span>
+    <span class="fb-user" id="fb-user-info"></span>
+    <button class="fb-btn fb-login" id="fb-login-btn" onclick="fbLogin()">🔐 구글 로그인</button>
+    <button class="fb-btn fb-logout" id="fb-logout-btn" onclick="fbLogout()" style="display:none">로그아웃</button>
+    <span id="today-display"></span>
+  </div>
+</header>
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="switchTab('trade',this)"><i class="fa-solid fa-file-invoice"></i>거래 일지</div>
+  <div class="nav-tab" onclick="switchTab('maint',this)"><i class="fa-solid fa-wrench"></i>차량 정비</div>
+</div>
+<main>
+
+<!-- ===== 거래 일지 ===== -->
+<section id="section-trade" class="section active">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="label"><i class="fa-solid fa-list-check"></i>총 거래</div><div class="value blue" id="st-total">0건</div></div>
+    <div class="stat-card"><div class="label"><i class="fa-solid fa-coins"></i>총 금액</div><div class="value yellow" id="st-sum">0만원</div></div>
+    <div class="stat-card"><div class="label"><i class="fa-solid fa-circle-check"></i>입금 완료</div><div class="value green" id="st-paid">0만원</div></div>
+    <div class="stat-card"><div class="label"><i class="fa-solid fa-clock"></i>미입금</div><div class="value red" id="st-unpaid">0만원</div></div>
+  </div>
+
+  <!-- 거래 목록 뷰 -->
+  <div id="view-list">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="filter-bar">
+          <select class="year-select" id="year-select" onchange="onYearChange()"></select>
+          <div id="month-chips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+        </div>
+      </div>
+      <button class="btn btn-ghost" onclick="showClientView()"><i class="fa-solid fa-users"></i>거래처별 보기</button>
+      <button class="btn btn-primary" onclick="openTradeModal()"><i class="fa-solid fa-plus"></i>거래 추가</button>
+    </div>
+    <div class="table-card">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>날짜</th><th>이름/회사</th><th>펌프카</th><th>작업 장소</th><th>금액</th><th>작업 구분</th><th>입금 상태</th><th></th></tr></thead>
+          <tbody id="trade-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 거래처별 뷰 -->
+  <div id="view-client" style="display:none">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button class="cv-back" onclick="showListView()"><i class="fa-solid fa-arrow-left"></i>전체 목록으로</button>
+        <select class="year-select" id="cv-year-select" onchange="renderClientView()">
+          <option value="all">전체 연도</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="openTradeModal()"><i class="fa-solid fa-plus"></i>거래 추가</button>
+    </div>
+
+    <!-- 거래처 선택 상태가 아닐 때: 카드 목록 -->
+    <div id="cv-cards"></div>
+
+    <!-- 거래처 선택 후: 상세 -->
+    <div id="cv-detail" style="display:none">
+      <div class="cv-banner">
+        <div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:4px"><i class="fa-solid fa-building"></i> 거래처</div>
+          <div class="cv-name" id="cv-detail-name"></div>
+          <div class="cv-sub" id="cv-detail-sub"></div>
+        </div>
+        <button class="cv-back" onclick="backToClientList()"><i class="fa-solid fa-arrow-left"></i>거래처 목록</button>
+      </div>
+      <div class="stats-grid" id="cv-detail-stats"></div>
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>날짜</th><th>펌프카</th><th>작업 장소</th><th>금액</th><th>작업 구분</th><th>입금 상태</th><th></th></tr></thead>
+            <tbody id="cv-detail-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 차량 정비 ===== -->
+<section id="section-maint" class="section">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="label"><i class="fa-solid fa-screwdriver-wrench"></i>총 정비 항목</div><div class="value blue" id="sm-total">0개</div></div>
+    <div class="stat-card"><div class="label"><i class="fa-solid fa-triangle-exclamation"></i>교체 필요</div><div class="value red" id="sm-over">0개</div></div>
+    <div class="stat-card"><div class="label"><i class="fa-solid fa-bell"></i>곧 교체</div><div class="value yellow" id="sm-soon">0개</div></div>
+    <div class="stat-card"><div class="label"><i class="fa-solid fa-circle-check"></i>정상</div><div class="value green" id="sm-ok">0개</div></div>
+  </div>
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <span class="chip active" id="mfb-all" onclick="filterMaint('all')">전체</span>
+      <span class="chip" id="mfb-overdue" onclick="filterMaint('overdue')"><i class="fa-solid fa-triangle-exclamation"></i> 교체 필요</span>
+      <span class="chip" id="mfb-soon" onclick="filterMaint('soon')"><i class="fa-solid fa-bell"></i> 곧 교체</span>
+      <span class="chip" id="mfb-ok" onclick="filterMaint('ok')"><i class="fa-solid fa-circle-check"></i> 정상</span>
+    </div>
+    <button class="btn btn-primary" onclick="openMaintModal()"><i class="fa-solid fa-plus"></i>정비 추가</button>
+  </div>
+  <div class="maint-grid" id="maint-grid"></div>
+</section>
+</main>
+
+<!-- 거래 모달 -->
+<div class="modal-overlay" id="trade-modal">
+  <div class="modal">
+    <div class="modal-header"><h3><i class="fa-solid fa-file-invoice" style="color:var(--accent)"></i>거래 추가</h3><button class="icon-btn" onclick="closeTradeModal()"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="field-row">
+        <div class="field"><label>날짜</label><input type="date" id="tf-date"></div>
+        <div class="field"><label>이름 / 회사</label><input type="text" id="tf-name" placeholder="이지훈, 태영건설..." list="name-suggestions"><datalist id="name-suggestions"></datalist></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>펌프카</label><select id="tf-pump"><option value="26">짤순이 26m</option><option value="32">펌프 32m</option></select></div>
+        <div class="field"><label>작업 구분</label><select id="tf-type"><option value="일대">일대</option><option value="반나절(오전)">반나절 (오전)</option><option value="반나절(오후)">반나절 (오후)</option></select></div>
+      </div>
+      <div class="field"><label>작업 장소</label><input type="text" id="tf-place" placeholder="고창 산책길, 전주 기초타설..."></div>
+      <div class="field"><label>금액 (만원)</label><input type="number" id="tf-amount" placeholder="130"></div>
+      <div class="field"><label>메모 (선택)</label><textarea id="tf-memo" placeholder="추가 메모..."></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeTradeModal()">취소</button><button class="btn btn-primary" onclick="saveTrade()"><i class="fa-solid fa-floppy-disk"></i>저장</button></div>
+  </div>
+</div>
+
+<!-- 정비 모달 -->
+<div class="modal-overlay" id="maint-modal">
+  <div class="modal">
+    <div class="modal-header"><h3><i class="fa-solid fa-wrench" style="color:var(--accent)"></i>정비 항목 추가</h3><button class="icon-btn" onclick="closeMaintModal()"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="field-row">
+        <div class="field"><label>항목 이름</label><input type="text" id="mf-name" placeholder="엔진오일, 타이어..."></div>
+        <div class="field"><label>차량</label><select id="mf-pump"><option value="짤순이 26m">짤순이 26m</option><option value="펌프 32m">펌프 32m</option><option value="공통">공통</option></select></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>마지막 교체일</label><input type="date" id="mf-last"></div>
+        <div class="field"><label>교체 주기</label><select id="mf-cycle-type" onchange="toggleCycleInput()"><option value="month">개월 주기</option><option value="date">날짜 직접 지정</option></select></div>
+      </div>
+      <div id="cycle-month-wrap" class="field"><label>몇 개월마다?</label><input type="number" id="mf-cycle-month" placeholder="예: 3" min="1"></div>
+      <div id="cycle-date-wrap" class="field" style="display:none"><label>다음 교체 날짜</label><input type="date" id="mf-cycle-date"></div>
+      <div class="field"><label>교체 비용 (만원, 선택)</label><input type="number" id="mf-cost" placeholder="예: 5"></div>
+      <div class="field"><label>메모</label><textarea id="mf-memo" placeholder="정비소, 부품 정보..."></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeMaintModal()">취소</button><button class="btn btn-primary" onclick="saveMaint()"><i class="fa-solid fa-floppy-disk"></i>저장</button></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCiNhSnGFp_0fqwFd5zrgdMs9hCx4A6nrs",
+  authDomain: "jinervini.firebaseapp.com",
+  databaseURL: "https://jinervini-default-rtdb.firebaseio.com",
+  projectId: "jinervini",
+  storageBucket: "jinervini.firebasestorage.app",
+  messagingSenderId: "81794575240",
+  appId: "1:81794575240:web:381e3f5be1b1a9c8ffa83d"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+let currentUser=null, tradeListener=null, maintListener=null;
+
+function setStatus(msg,color){const el=document.getElementById('fb-sync-status');if(el){el.textContent=msg;el.style.color=color;}}
+
+async function fbSaveData(path,data){
+  if(!currentUser) return;
+  try{ await set(ref(db,'users/'+currentUser.uid+'/'+path), JSON.stringify(data)); }
+  catch(e){console.error(e);}
+}
+async function fbLoadData(path){
+  if(!currentUser) return null;
+  try{ const snap=await get(ref(db,'users/'+currentUser.uid+'/'+path)); return snap.exists()?JSON.parse(snap.val()):null; }
+  catch(e){return null;}
+}
+
+window.fbSaveTrades=async function(data){
+  if(!currentUser)return;
+  setStatus('☁️ 저장중...','var(--accent)');
+  await fbSaveData('pumpTrades',data);
+  setStatus('☁️ 동기화됨','var(--green)');
+};
+window.fbSaveMaints=async function(data){
+  if(!currentUser)return;
+  setStatus('☁️ 저장중...','var(--accent)');
+  await fbSaveData('pumpMaints',data);
+  setStatus('☁️ 동기화됨','var(--green)');
+};
+
+window.fbLogin=async function(){ try{ await signInWithPopup(auth,provider); }catch(e){ alert('로그인 실패: '+e.message); } };
+window.fbLogout=async function(){
+  if(tradeListener){tradeListener();tradeListener=null;}
+  if(maintListener){maintListener();maintListener=null;}
+  await signOut(auth);
+};
+
+onAuthStateChanged(auth, async (user)=>{
+  currentUser=user;
+  const loginBtn=document.getElementById('fb-login-btn');
+  const logoutBtn=document.getElementById('fb-logout-btn');
+  const userInfo=document.getElementById('fb-user-info');
+  if(user){
+    loginBtn.style.display='none'; logoutBtn.style.display='inline-flex';
+    userInfo.textContent=user.displayName||user.email;
+    setStatus('☁️ 동기화중...','var(--accent)');
+
+    const fbTrades=await fbLoadData('pumpTrades');
+    const fbMaints=await fbLoadData('pumpMaints');
+
+    if(fbTrades&&fbTrades.length>0){
+      localStorage.setItem('pumpcar_trade_v2',JSON.stringify(fbTrades));
+    }else{
+      const local=JSON.parse(localStorage.getItem('pumpcar_trade_v2')||'[]');
+      if(local.length>0) await fbSaveData('pumpTrades',local);
+    }
+    if(fbMaints&&fbMaints.length>0){
+      localStorage.setItem('pumpcar_maint_v1',JSON.stringify(fbMaints));
+    }else{
+      const local=JSON.parse(localStorage.getItem('pumpcar_maint_v1')||'[]');
+      if(local.length>0) await fbSaveData('pumpMaints',local);
+    }
+
+    if(typeof window.reloadAfterSync==='function') window.reloadAfterSync();
+    setStatus('☁️ 동기화됨','var(--green)');
+
+    if(tradeListener) tradeListener();
+    tradeListener=onValue(ref(db,'users/'+user.uid+'/pumpTrades'),(snap)=>{
+      if(snap.exists()){
+        localStorage.setItem('pumpcar_trade_v2',JSON.stringify(JSON.parse(snap.val())));
+        if(typeof window.reloadAfterSync==='function') window.reloadAfterSync();
+        setStatus('☁️ 동기화됨','var(--green)');
+      }
+    });
+    if(maintListener) maintListener();
+    maintListener=onValue(ref(db,'users/'+user.uid+'/pumpMaints'),(snap)=>{
+      if(snap.exists()){
+        localStorage.setItem('pumpcar_maint_v1',JSON.stringify(JSON.parse(snap.val())));
+        if(typeof window.reloadAfterSync==='function') window.reloadAfterSync();
+        setStatus('☁️ 동기화됨','var(--green)');
+      }
+    });
+  }else{
+    loginBtn.style.display='inline-flex'; logoutBtn.style.display='none'; userInfo.textContent='';
+    setStatus('☁️ 로그인하면 동기화','var(--text3)');
+  }
+});
+</script>
+
+<script>
+const LS_TRADE='pumpcar_trade_v2';
+const LS_MAINT='pumpcar_maint_v1';
+let trades=[], maints=[];
+let activeMonth='all';
+let maintFilter='all';
+let currentView='list'; // 'list' | 'client'
+let selectedClient=null;
+
+function loadData(){
+  try{trades=JSON.parse(localStorage.getItem(LS_TRADE))||[];}catch(e){trades=[];}
+  try{maints=JSON.parse(localStorage.getItem(LS_MAINT))||[];}catch(e){maints=[];}
+  if(!trades.length) seedTrades();
+  if(!maints.length) seedMaints();
+}
+function saveTrades(){localStorage.setItem(LS_TRADE,JSON.stringify(trades));if(typeof window.fbSaveTrades==='function')window.fbSaveTrades(trades);}
+function saveMaints(){localStorage.setItem(LS_MAINT,JSON.stringify(maints));if(typeof window.fbSaveMaints==='function')window.fbSaveMaints(maints);}
+
+function seedTrades(){
+  trades=[
+    {id:1,date:'2026-02-10',name:'태영건설',pump:'32',place:'전주 기초타설',amount:80,type:'일대',paid:true,memo:''},
+    {id:2,date:'2026-04-03',name:'태영건설',pump:'32',place:'익산 아파트',amount:90,type:'일대',paid:false,memo:''},
+    {id:3,date:'2026-05-30',name:'이지훈',pump:'26',place:'고창 산책길',amount:130,type:'일대',paid:false,memo:''},
+    {id:4,date:'2026-06-02',name:'태영건설',pump:'32',place:'전주 기초타설',amount:70,type:'반나절(오전)',paid:false,memo:''},
+    {id:5,date:'2026-08-14',name:'태영건설',pump:'26',place:'군산 공장',amount:60,type:'반나절(오후)',paid:false,memo:''},
+  ];
+  saveTrades();
+}
+function seedMaints(){
+  const today=new Date();
+  const fmt=d=>d.toISOString().slice(0,10);
+  const ago=n=>{const d=new Date(today);d.setMonth(d.getMonth()-n);return fmt(d);};
+  maints=[
+    {id:1,name:'엔진오일',pump:'짤순이 26m',last:ago(3),cycleType:'month',cycleMonth:3,cycleDate:'',cost:5,memo:'5W-30 사용'},
+    {id:2,name:'타이어 점검',pump:'펌프 32m',last:ago(11),cycleType:'month',cycleMonth:12,cycleDate:'',cost:0,memo:''},
+    {id:3,name:'에어필터',pump:'공통',last:ago(1),cycleType:'month',cycleMonth:6,cycleDate:'',cost:2,memo:''},
+  ];
+  saveMaints();
+}
+
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function fmtDate(s){if(!s)return'-';const[y,m,d]=s.split('-');return `${y.slice(2)}년 ${m}월 ${d}일`;}
+function getNextDate(m){
+  if(m.cycleType==='date') return m.cycleDate;
+  if(!m.last||!m.cycleMonth) return '';
+  const d=new Date(m.last);d.setMonth(d.getMonth()+parseInt(m.cycleMonth));return d.toISOString().slice(0,10);
+}
+function getDaysLeft(s){if(!s)return null;return Math.round((new Date(s)-new Date(todayStr()))/86400000);}
+function getMaintStatus(m){const nd=getNextDate(m);if(!nd)return 'ok';const days=getDaysLeft(nd);if(days<0)return 'overdue';if(days<=30)return 'soon';return 'ok';}
+
+function initHeaderDate(){
+  const d=new Date();const wd=['일','월','화','수','목','금','토'];
+  document.getElementById('today-display').textContent=`${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${wd[d.getDay()]})`;
+}
+
+function switchTab(tab,el){
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('section-'+tab).classList.add('active');
+}
+
+// ===== YEAR / MONTH =====
+function buildYearSelect(){
+  const years=[...new Set(trades.map(t=>t.date.slice(0,4)))].sort();
+  const cur=new Date().getFullYear().toString();
+  if(!years.includes(cur)) years.push(cur);
+  years.sort();
+  const sel=document.getElementById('year-select');
+  const prev=sel.value||cur;
+  sel.innerHTML=years.map(y=>`<option value="${y}"${y===prev?'selected':''}>${y}년</option>`).join('');
+
+  // cv year select
+  const cvSel=document.getElementById('cv-year-select');
+  const cvPrev=cvSel.value||'all';
+  cvSel.innerHTML=`<option value="all">전체 연도</option>`+years.map(y=>`<option value="${y}"${y===cvPrev?'selected':''}>${y}년</option>`).join('');
+}
+function buildMonthChips(){
+  const year=document.getElementById('year-select').value;
+  const months=[...new Set(trades.filter(t=>t.date.startsWith(year)).map(t=>parseInt(t.date.split('-')[1])))].sort((a,b)=>a-b);
+  const div=document.getElementById('month-chips');
+  div.innerHTML=`<span class="chip ${activeMonth==='all'?'active':''}" onclick="setMonth('all')">전체</span>`;
+  months.forEach(m=>{div.innerHTML+=`<span class="chip ${activeMonth===m?'active':''}" onclick="setMonth(${m})">${m}월</span>`;});
+}
+function setMonth(m){activeMonth=m;buildMonthChips();renderTradeTable();}
+function onYearChange(){activeMonth='all';renderTrade();}
+
+// ===== RENDER TRADE =====
+function renderTrade(){
+  buildYearSelect();
+  buildMonthChips();
+  renderTradeTable();
+  updateTradeStats();
+}
+function getFilteredTrades(){
+  const year=document.getElementById('year-select').value;
+  let list=trades.filter(t=>t.date.startsWith(year));
+  if(activeMonth!=='all') list=list.filter(t=>parseInt(t.date.split('-')[1])===activeMonth);
+  return list.sort((a,b)=>a.date.localeCompare(b.date));
+}
+function updateTradeStats(){
+  const list=getFilteredTrades();
+  const sum=list.reduce((a,r)=>a+r.amount,0);
+  const paid=list.filter(r=>r.paid).reduce((a,r)=>a+r.amount,0);
+  document.getElementById('st-total').textContent=list.length+'건';
+  document.getElementById('st-sum').textContent=sum.toLocaleString()+'만원';
+  document.getElementById('st-paid').textContent=paid.toLocaleString()+'만원';
+  document.getElementById('st-unpaid').textContent=(sum-paid).toLocaleString()+'만원';
+}
+function renderTradeTable(){
+  const list=getFilteredTrades();
+  const tbody=document.getElementById('trade-tbody');
+  if(!list.length){tbody.innerHTML=`<tr class="empty-row"><td colspan="8"><i class="fa-solid fa-inbox" style="font-size:24px;display:block;margin-bottom:8px"></i>거래 내역이 없습니다</td></tr>`;return;}
+  tbody.innerHTML=list.map(r=>tradeRow(r,true)).join('');
+}
+function tradeRow(r,showName){
+  const pump=r.pump==='26'?`<span class="badge badge-26"><i class="fa-solid fa-truck-moving"></i> 짤순이 26m</span>`:`<span class="badge badge-32"><i class="fa-solid fa-truck-moving"></i> 32m</span>`;
+  const tb=r.type==='일대'?`<span class="badge badge-full">일대</span>`:r.type==='반나절(오전)'?`<span class="badge badge-am">오전 반나절</span>`:`<span class="badge badge-pm">오후 반나절</span>`;
+  const pb=r.paid?`<button class="pay-btn paid" onclick="togglePaid(${r.id})"><i class="fa-solid fa-check"></i> 입금완료</button>`:`<button class="pay-btn unpaid" onclick="togglePaid(${r.id})"><i class="fa-regular fa-clock"></i> 미입금</button>`;
+  const nameCell=showName?`<td style="font-weight:700">${r.name}</td>`:'';
+  const cols=showName?8:7;
+  return `<tr>
+    <td style="white-space:nowrap;color:var(--text2)">${fmtDate(r.date)}</td>
+    ${nameCell}
+    <td>${pump}</td>
+    <td style="color:var(--text2)">${r.place}</td>
+    <td style="font-weight:700;color:var(--accent)">${r.amount.toLocaleString()}만원</td>
+    <td>${tb}</td>
+    <td>${pb}</td>
+    <td><button class="icon-btn" onclick="deleteTrade(${r.id})"><i class="fa-solid fa-trash"></i></button></td>
+  </tr>`;
+}
+function togglePaid(id){
+  const r=trades.find(t=>t.id===id);
+  if(r){r.paid=!r.paid;saveTrades();}
+  renderTrade();
+  if(currentView==='client'){
+    if(selectedClient) renderClientDetail(selectedClient);
+    else renderClientView();
+  }
+}
+function deleteTrade(id){
+  if(!confirm('이 거래를 삭제하시겠습니까?')) return;
+  trades=trades.filter(t=>t.id!==id);
+  saveTrades();renderTrade();
+  if(currentView==='client'){
+    if(selectedClient) renderClientDetail(selectedClient);
+    else renderClientView();
+  }
+}
+
+// ===== CLIENT VIEW =====
+function showClientView(){
+  currentView='client';
+  selectedClient=null;
+  document.getElementById('view-list').style.display='none';
+  document.getElementById('view-client').style.display='block';
+  document.getElementById('cv-cards').style.display='';
+  document.getElementById('cv-detail').style.display='none';
+  buildYearSelect();
+  renderClientView();
+}
+function showListView(){
+  currentView='list';
+  selectedClient=null;
+  document.getElementById('view-list').style.display='';
+  document.getElementById('view-client').style.display='none';
+  renderTrade();
+}
+function backToClientList(){
+  selectedClient=null;
+  document.getElementById('cv-cards').style.display='';
+  document.getElementById('cv-detail').style.display='none';
+  updateTradeStats();
+}
+function onCvYearChange(){renderClientView();}
+
+function getClientTrades(name, year){
+  let list=trades.filter(t=>t.name===name);
+  if(year&&year!=='all') list=list.filter(t=>t.date.startsWith(year));
+  return list.sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+function renderClientView(){
+  const year=document.getElementById('cv-year-select').value;
+  // group by name
+  let src=year==='all'?trades:trades.filter(t=>t.date.startsWith(year));
+  const names=[...new Set(src.map(t=>t.name))].sort();
+
+  // update overall stats from all trades (or year filtered)
+  const sum=src.reduce((a,r)=>a+r.amount,0);
+  const paid=src.filter(r=>r.paid).reduce((a,r)=>a+r.amount,0);
+  document.getElementById('st-total').textContent=src.length+'건';
+  document.getElementById('st-sum').textContent=sum.toLocaleString()+'만원';
+  document.getElementById('st-paid').textContent=paid.toLocaleString()+'만원';
+  document.getElementById('st-unpaid').textContent=(sum-paid).toLocaleString()+'만원';
+
+  if(!names.length){
+    document.getElementById('cv-cards').innerHTML=`<div style="text-align:center;padding:48px;color:var(--text3)"><i class="fa-solid fa-users" style="font-size:28px;display:block;margin-bottom:10px"></i>거래처가 없습니다</div>`;
+    return;
+  }
+
+  document.getElementById('cv-cards').innerHTML=`<div class="client-grid">`+names.map(name=>{
+    const list=getClientTrades(name, year);
+    const total=list.reduce((a,r)=>a+r.amount,0);
+    const paidAmt=list.filter(r=>r.paid).reduce((a,r)=>a+r.amount,0);
+    const unpaidList=list.filter(r=>!r.paid);
+    const unpaidAmt=total-paidAmt;
+    const hasUnpaid=unpaidList.length>0;
+    const initials=name.slice(0,2);
+    return `<div class="client-card ${hasUnpaid?'has-unpaid':'all-paid'}" onclick="openClientDetail('${name}')">
+      ${hasUnpaid
+        ? `<div class="cc-unpaid-badge">미입금 ${unpaidList.length}건</div>`
+        : `<div class="cc-paid-badge"><i class="fa-solid fa-check"></i> 완납</div>`}
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="width:42px;height:42px;border-radius:50%;background:${hasUnpaid?'rgba(245,101,101,0.15)':'rgba(62,207,142,0.15)'};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:${hasUnpaid?'var(--red)':'var(--green)'};flex-shrink:0">${initials}</div>
+        <div><div class="cc-name">${name}</div><div class="cc-meta">총 ${list.length}건 거래</div></div>
+      </div>
+      <div class="cc-row"><span class="cc-label">총 거래금액</span><span style="font-weight:700;color:var(--accent)">${total.toLocaleString()}만원</span></div>
+      <div class="cc-row"><span class="cc-label">입금 완료</span><span style="color:var(--green);font-weight:700">${paidAmt.toLocaleString()}만원</span></div>
+      <div class="cc-row"><span class="cc-label" style="${hasUnpaid?'color:var(--red)':''}">미입금</span><span style="font-weight:700;color:${hasUnpaid?'var(--red)':'var(--text3)'}">${unpaidAmt.toLocaleString()}만원</span></div>
+    </div>`;
+  }).join('')+`</div>`;
+}
+
+function openClientDetail(name){
+  selectedClient=name;
+  document.getElementById('cv-cards').style.display='none';
+  document.getElementById('cv-detail').style.display='block';
+  renderClientDetail(name);
+}
+function renderClientDetail(name){
+  const year=document.getElementById('cv-year-select').value;
+  const list=getClientTrades(name, year);
+  const total=list.reduce((a,r)=>a+r.amount,0);
+  const paidAmt=list.filter(r=>r.paid).reduce((a,r)=>a+r.amount,0);
+  const unpaidList=list.filter(r=>!r.paid);
+  const unpaidAmt=total-paidAmt;
+
+  document.getElementById('cv-detail-name').textContent=name;
+  document.getElementById('cv-detail-sub').textContent=`${year==='all'?'전체':year+'년'} · 총 ${list.length}건 거래`;
+
+  // stats
+  document.getElementById('cv-detail-stats').innerHTML=`
+    <div class="stat-card"><div class="label"><i class="fa-solid fa-list-check"></i>총 거래</div><div class="value blue">${list.length}건</div></div>
+    <div class="stat-card"><div class="label"><i class="fa-solid fa-coins"></i>총 금액</div><div class="value yellow">${total.toLocaleString()}만원</div></div>
+    <div class="stat-card"><div class="label"><i class="fa-solid fa-circle-check"></i>입금 완료</div><div class="value green">${paidAmt.toLocaleString()}만원</div></div>
+    <div class="stat-card"><div class="label"><i class="fa-solid fa-clock"></i>미입금 (${unpaidList.length}건)</div><div class="value red">${unpaidAmt.toLocaleString()}만원</div></div>`;
+
+  // update top stats too
+  document.getElementById('st-total').textContent=list.length+'건';
+  document.getElementById('st-sum').textContent=total.toLocaleString()+'만원';
+  document.getElementById('st-paid').textContent=paidAmt.toLocaleString()+'만원';
+  document.getElementById('st-unpaid').textContent=unpaidAmt.toLocaleString()+'만원';
+
+  const tbody=document.getElementById('cv-detail-tbody');
+  if(!list.length){tbody.innerHTML=`<tr class="empty-row"><td colspan="7">거래 내역이 없습니다</td></tr>`;return;}
+  tbody.innerHTML=list.map(r=>tradeRow(r,false)).join('');
+}
+
+// ===== TRADE MODAL =====
+function updateNameSuggestions(){
+  const names=[...new Set(trades.map(t=>t.name))];
+  document.getElementById('name-suggestions').innerHTML=names.map(n=>`<option value="${n}">`).join('');
+}
+function openTradeModal(){updateNameSuggestions();document.getElementById('tf-date').value=todayStr();document.getElementById('tf-name').value='';document.getElementById('tf-pump').value='26';document.getElementById('tf-type').value='일대';document.getElementById('tf-place').value='';document.getElementById('tf-amount').value='';document.getElementById('tf-memo').value='';document.getElementById('trade-modal').classList.add('open');}
+function closeTradeModal(){document.getElementById('trade-modal').classList.remove('open');}
+function saveTrade(){
+  const date=document.getElementById('tf-date').value;
+  const name=document.getElementById('tf-name').value.trim();
+  const pump=document.getElementById('tf-pump').value;
+  const type=document.getElementById('tf-type').value;
+  const place=document.getElementById('tf-place').value.trim();
+  const amount=parseInt(document.getElementById('tf-amount').value)||0;
+  const memo=document.getElementById('tf-memo').value.trim();
+  if(!date||!name||!place||!amount){alert('날짜, 이름, 장소, 금액은 필수입니다.');return;}
+  trades.push({id:Date.now(),date,name,pump,place,amount,type,paid:false,memo});
+  saveTrades();closeTradeModal();
+  if(currentView==='client') renderClientView();
+  activeMonth='all';renderTrade();
+}
+
+// ===== MAINT =====
+function filterMaint(f){
+  maintFilter=f;
+  ['all','overdue','soon','ok'].forEach(k=>document.getElementById('mfb-'+k).classList.toggle('active',k===f));
+  renderMaint();
+}
+function renderMaint(){
+  let list=[...maints];
+  if(maintFilter==='overdue') list=list.filter(m=>getMaintStatus(m)==='overdue');
+  else if(maintFilter==='soon') list=list.filter(m=>getMaintStatus(m)==='soon');
+  else if(maintFilter==='ok') list=list.filter(m=>getMaintStatus(m)==='ok');
+  const over=maints.filter(m=>getMaintStatus(m)==='overdue').length;
+  const soon=maints.filter(m=>getMaintStatus(m)==='soon').length;
+  const ok=maints.filter(m=>getMaintStatus(m)==='ok').length;
+  document.getElementById('sm-total').textContent=maints.length+'개';
+  document.getElementById('sm-over').textContent=over+'개';
+  document.getElementById('sm-soon').textContent=soon+'개';
+  document.getElementById('sm-ok').textContent=ok+'개';
+  const grid=document.getElementById('maint-grid');
+  if(!list.length){grid.innerHTML=`<div style="text-align:center;padding:48px;color:var(--text3);grid-column:1/-1"><i class="fa-solid fa-wrench" style="font-size:28px;display:block;margin-bottom:10px"></i>정비 항목이 없습니다</div>`;return;}
+  grid.innerHTML=list.map(m=>{
+    const status=getMaintStatus(m);
+    const nd=getNextDate(m);
+    const days=nd?getDaysLeft(nd):null;
+    let sLabel,sClass,nClass;
+    if(status==='overdue'){sLabel='교체 필요';sClass='status-overdue';nClass='overdue';}
+    else if(status==='soon'){sLabel='곧 교체';sClass='status-soon';nClass='soon';}
+    else{sLabel='정상';sClass='status-ok';nClass='ok';}
+    let daysText='';
+    if(days!==null){
+      if(days<0) daysText=`<span style="font-size:11px;color:var(--red)">(${Math.abs(days)}일 초과)</span>`;
+      else if(days===0) daysText=`<span style="font-size:11px;color:var(--accent)">(오늘)</span>`;
+      else daysText=`<span style="font-size:11px;color:var(--text3)">(${days}일 후)</span>`;
+    }
+    return `<div class="maint-card ${status}">
+      <div class="maint-card-header">
+        <div><div class="maint-title">${m.name}</div><div class="maint-pump"><i class="fa-solid fa-truck-moving" style="font-size:10px"></i> ${m.pump}</div></div>
+        <div style="display:flex;align-items:center;gap:6px"><span class="maint-status ${sClass}">${sLabel}</span><button class="icon-btn" onclick="deleteMaint(${m.id})"><i class="fa-solid fa-trash"></i></button></div>
+      </div>
+      <div class="maint-info">
+        <div class="maint-info-item"><div class="mi-label">마지막 교체</div><div class="mi-val">${fmtDate(m.last)}</div></div>
+        <div class="maint-info-item"><div class="mi-label">교체 주기</div><div class="mi-val">${m.cycleType==='month'?m.cycleMonth+'개월마다':'날짜 지정'}</div></div>
+        ${m.cost?`<div class="maint-info-item"><div class="mi-label">교체 비용</div><div class="mi-val" style="color:var(--accent)">${m.cost}만원</div></div>`:''}
+      </div>
+      <div class="maint-next">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:3px"><i class="fa-regular fa-calendar"></i> 다음 교체 예정</div>
+        <div class="next-date ${nClass}" style="font-weight:700;font-size:14px">${nd?fmtDate(nd):'미설정'} ${daysText}</div>
+      </div>
+      ${m.memo?`<div class="maint-memo"><i class="fa-regular fa-note-sticky" style="font-size:11px"></i> ${m.memo}</div>`:''}
+      <div class="maint-actions"><button class="btn btn-ghost" style="font-size:12px;padding:6px 12px" onclick="markDoneToday(${m.id})"><i class="fa-solid fa-rotate"></i> 오늘 교체 완료</button></div>
+    </div>`;
+  }).join('');
+}
+function markDoneToday(id){const m=maints.find(m=>m.id===id);if(!m)return;m.last=todayStr();if(m.cycleType==='date')alert('다음 교체 날짜를 직접 수정해주세요.');saveMaints();renderMaint();}
+function deleteMaint(id){if(!confirm('삭제하시겠습니까?'))return;maints=maints.filter(m=>m.id!==id);saveMaints();renderMaint();}
+
+function toggleCycleInput(){const t=document.getElementById('mf-cycle-type').value;document.getElementById('cycle-month-wrap').style.display=t==='month'?'':'none';document.getElementById('cycle-date-wrap').style.display=t==='date'?'':'none';}
+function openMaintModal(){document.getElementById('mf-name').value='';document.getElementById('mf-pump').value='짤순이 26m';document.getElementById('mf-last').value=todayStr();document.getElementById('mf-cycle-type').value='month';document.getElementById('mf-cycle-month').value='';document.getElementById('mf-cycle-date').value='';document.getElementById('mf-cost').value='';document.getElementById('mf-memo').value='';toggleCycleInput();document.getElementById('maint-modal').classList.add('open');}
+function closeMaintModal(){document.getElementById('maint-modal').classList.remove('open');}
+function saveMaint(){
+  const name=document.getElementById('mf-name').value.trim();
+  const pump=document.getElementById('mf-pump').value;
+  const last=document.getElementById('mf-last').value;
+  const cycleType=document.getElementById('mf-cycle-type').value;
+  const cycleMonth=parseInt(document.getElementById('mf-cycle-month').value)||0;
+  const cycleDate=document.getElementById('mf-cycle-date').value;
+  const cost=parseInt(document.getElementById('mf-cost').value)||0;
+  const memo=document.getElementById('mf-memo').value.trim();
+  if(!name||!last){alert('항목 이름과 마지막 교체일은 필수입니다.');return;}
+  if(cycleType==='month'&&!cycleMonth){alert('교체 주기(개월)를 입력해주세요.');return;}
+  if(cycleType==='date'&&!cycleDate){alert('다음 교체 날짜를 입력해주세요.');return;}
+  maints.push({id:Date.now(),name,pump,last,cycleType,cycleMonth,cycleDate,cost,memo});
+  saveMaints();closeMaintModal();renderMaint();
+}
+
+document.getElementById('trade-modal').addEventListener('click',function(e){if(e.target===this)closeTradeModal();});
+document.getElementById('maint-modal').addEventListener('click',function(e){if(e.target===this)closeMaintModal();});
+document.getElementById('cv-year-select').addEventListener('change',function(){
+  if(selectedClient) renderClientDetail(selectedClient);
+  else renderClientView();
+});
+
+loadData();initHeaderDate();renderTrade();renderMaint();
+
+window.reloadAfterSync=function(){
+  loadData();
+  if(currentView==='client'){
+    if(selectedClient) renderClientDetail(selectedClient);
+    else renderClientView();
+  }else{
+    renderTrade();
+  }
+  renderMaint();
+};
+</script>
+</body>
+</html>
